@@ -21,10 +21,8 @@ import butterknife.ButterKnife;
 public class StreamerListAdapter extends BaseAdapter {
 
     private final String LOG_TAG = StreamerListAdapter.class.getSimpleName();
-
-    private ArrayList<ListItem> items;
-
     private final LayoutInflater inflater;
+    private ArrayList<ListItem> items;
 
     public StreamerListAdapter(Context context) {
         items = new ArrayList<ListItem>();
@@ -42,12 +40,14 @@ public class StreamerListAdapter extends BaseAdapter {
     }
 
     public boolean add(ListItem item) {
+        boolean returnValue = items.add(item);
         notifyDataSetChanged();
-        return items.add(item);
+        return returnValue;
     }
 
     public void clear() {
         items.clear();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -76,7 +76,7 @@ public class StreamerListAdapter extends BaseAdapter {
                     .into(holder.item_image);
 
             holder.item_name.setText(item.getName());
-
+            holder.item_description.setText(item.getDescription());
         }
 
         return view;
@@ -88,6 +88,8 @@ public class StreamerListAdapter extends BaseAdapter {
         ImageView item_image;
         @Bind(R.id.item_name)
         TextView item_name;
+        @Bind(R.id.item_description)
+        TextView item_description;
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);

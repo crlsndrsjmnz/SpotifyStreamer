@@ -1,5 +1,6 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -25,7 +28,6 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.Pager;
 
 /**
  * Fragment containing the artist search functionality and result list.
@@ -48,7 +50,7 @@ public class MainActivityFragment extends Fragment {
 
     @OnItemClick(R.id.artist_resut_list)
     void onSelectArtist(int position) {
-        Toast.makeText(getActivity(), "You clicked: " + mListAdapter.getItem(position), Toast.LENGTH_SHORT).show();
+        getTopTracks(mListAdapter.getItem(position).getId());
     }
 
     @OnClick(R.id.search_button)
@@ -73,8 +75,20 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void searchArtist() {
+
+        Log.d(LOG_TAG, "searchArtist " + artistSearchBar.getText().toString());
+
         FetchArtistsTask artistsTask = new FetchArtistsTask();
         artistsTask.execute(artistSearchBar.getText().toString());
+    }
+
+    public void getTopTracks(String id) {
+
+        Log.d(LOG_TAG, "getTopTracks " + id);
+
+        Intent topSongsIntent = new Intent(getActivity(), TopSongsActivity.class);
+        topSongsIntent.putExtra(Intent.EXTRA_TEXT, id);
+        startActivity(topSongsIntent);
     }
 
     @Override
@@ -95,12 +109,12 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchArtistsTask extends AsyncTask<String, Void, Pager<Artist>> {
+    public class FetchArtistsTask extends AsyncTask<String, Void, List<Artist>> {
 
         private final String LOG_TAG = FetchArtistsTask.class.getSimpleName();
 
         @Override
-        protected Pager<Artist> doInBackground(String... params) {
+        protected List<Artist> doInBackground(String... params) {
 
             // If there's no search string, there's nothing to look up.  Verify size of params.
             if (params.length == 0) {
@@ -111,16 +125,17 @@ public class MainActivityFragment extends Fragment {
             SpotifyService spotify = api.getService();
             ArtistsPager results = spotify.searchArtists(params[0]);
 
-            return results.artists;
+            return results.artists != null ? results.artists.items : null;
         }
 
         @Override
-        protected void onPostExecute(Pager<Artist> result) {
+        protected void onPostExecute(List<Artist> result) {
             String artistImage = "";
 
-            if (result != null) {
-                mListAdapter.clear();
-                for (Artist artist : result.items) {
+            mListAdapter.clear();
+
+            if (result != null && result.size() > 0) {
+                for (Artist artist : result) {
                     if (artist.images.size() > 0) {
                         Image image = artist.images.get(artist.images.size() - 1);
                         artistImage = image.url;
@@ -128,8 +143,10 @@ public class MainActivityFragment extends Fragment {
                         artistImage = null;
                     }
 
-                    mListAdapter.add(new ListItem(artist.id, artistImage, artist.name));
+                    mListAdapter.add(new ListItem(artist.id, artistImage, artist.name, ""));
                 }
+            } else {
+                Toast.makeText(getActivity(), "Artist not found", Toast.LENGTH_SHORT).show();
             }
         }
     }
