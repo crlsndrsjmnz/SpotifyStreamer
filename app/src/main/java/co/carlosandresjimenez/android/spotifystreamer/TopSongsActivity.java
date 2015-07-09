@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +37,6 @@ public class TopSongsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new TopSongsFragment())
-                    .commit();
-        }
     }
 
 
@@ -66,6 +62,10 @@ public class TopSongsActivity extends ActionBarActivity {
     public static class TopSongsFragment extends Fragment {
 
         private final String LOG_TAG = TopSongsFragment.class.getSimpleName();
+
+        private final String KEY_SONGS_VIEW_STATE = "KEY_SONGS_VIEW_STATE";
+        private final String KEY_SONGS_LIST_POSITION = "KEY_SONGS_LIST_POSITION";
+
         @Bind(R.id.artist_top_songs_list)
         ListView listOfTopSongs;
         private String mArtistIdStr;
@@ -78,14 +78,34 @@ public class TopSongsActivity extends ActionBarActivity {
             View rootView = inflater.inflate(R.layout.artist_detail, container, false);
             ButterKnife.bind(this, rootView);
 
+            ArrayList<ListItem> mSongList;
+            int songsListPosition = 0;
+
+            if (savedInstanceState != null) {
+
+                if (savedInstanceState.containsKey(KEY_SONGS_VIEW_STATE)) {
+                    mSongList = savedInstanceState.getParcelableArrayList(KEY_SONGS_VIEW_STATE);
+                } else {
+                    mSongList = new ArrayList<ListItem>();
+                }
+
+                if (savedInstanceState.containsKey(KEY_SONGS_LIST_POSITION)) {
+                    songsListPosition = savedInstanceState.getInt(KEY_SONGS_LIST_POSITION);
+                }
+            } else {
+                mSongList = new ArrayList<ListItem>();
+            }
+
             // The ArrayAdapter will take data from a source and
             // use it to populate the ListView it's attached to.
-            mListAdapter = new StreamerListAdapter(getActivity());
+            mListAdapter = new StreamerListAdapter(mSongList, getActivity());
 
-            if (listOfTopSongs != null)
+            if (listOfTopSongs != null) {
                 listOfTopSongs.setAdapter(mListAdapter);
-            else
+                listOfTopSongs.setSelection(songsListPosition);
+            } else {
                 Log.e(LOG_TAG, "ListOfTopSongs is NULL");
+            }
 
             // The detail Activity called via intent.  Inspect the intent for forecast data.
             Intent intent = getActivity().getIntent();
@@ -96,6 +116,14 @@ public class TopSongsActivity extends ActionBarActivity {
             searchTopTracks();
 
             return rootView;
+        }
+
+        @Override
+        public void onSaveInstanceState(Bundle savedInstanceState) {
+            super.onSaveInstanceState(savedInstanceState);
+
+            savedInstanceState.putInt(KEY_SONGS_LIST_POSITION, listOfTopSongs.getFirstVisiblePosition());
+            savedInstanceState.putParcelableArrayList(KEY_SONGS_VIEW_STATE, mListAdapter.getAllItems());
         }
 
         public void searchTopTracks() {

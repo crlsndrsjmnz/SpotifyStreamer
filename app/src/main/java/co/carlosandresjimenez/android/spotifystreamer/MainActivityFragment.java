@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -35,6 +36,9 @@ import kaaes.spotify.webapi.android.models.Image;
 public class MainActivityFragment extends Fragment {
 
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+
+    private final String KEY_ARTISTS_VIEW_STATE = "KEY_ARTISTS_VIEW_STATE";
+    private final String KEY_ARTISTS_LIST_POSITION = "KEY_ARTISTS_LIST_POSITION";
 
     @Bind(R.id.artist_resut_list)
     ListView listOfArtists;
@@ -97,40 +101,75 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
 
+        ArrayList<ListItem> mArtistList;
+        int artistListPosition = 0;
+
+        if (savedInstanceState != null) {
+
+            if (savedInstanceState.containsKey(KEY_ARTISTS_VIEW_STATE)) {
+                mArtistList = savedInstanceState.getParcelableArrayList(KEY_ARTISTS_VIEW_STATE);
+            } else {
+                mArtistList = new ArrayList<ListItem>();
+            }
+
+            if (savedInstanceState.containsKey(KEY_ARTISTS_LIST_POSITION)) {
+                artistListPosition = savedInstanceState.getInt(KEY_ARTISTS_LIST_POSITION);
+            }
+        } else {
+            mArtistList = new ArrayList<ListItem>();
+        }
+
         // The ArrayAdapter will take data from a source and
         // use it to populate the ListView it's attached to.
-        mListAdapter = new StreamerListAdapter(getActivity());
+        mListAdapter = new StreamerListAdapter(mArtistList, getActivity());
 
-        if (listOfArtists != null)
+        if (listOfArtists != null) {
             listOfArtists.setAdapter(mListAdapter);
-        else
+            listOfArtists.setSelection(artistListPosition);
+        } else {
             Log.e(LOG_TAG, "ListOfArtists is NULL");
+        }
 
         return rootView;
     }
 
-    public class FetchArtistsTask extends AsyncTask<String, Void, List<Artist>> {
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putInt(KEY_ARTISTS_LIST_POSITION, listOfArtists.getFirstVisiblePosition());
+        savedInstanceState.putParcelableArrayList(KEY_ARTISTS_VIEW_STATE, mListAdapter.getAllItems());
+    }
+
+    public class FetchArtistsTask extends AsyncTask<String, Void, AsyncTaskResult<List<Artist>>> {
 
         private final String LOG_TAG = FetchArtistsTask.class.getSimpleName();
 
         @Override
-        protected List<Artist> doInBackground(String... params) {
+        protected AsyncTaskResult<List<Artist>> doInBackground(String... params) {
+
+            SpotifyService spotify;
+            ArtistsPager results;
 
             // If there's no search string, there's nothing to look up.  Verify size of params.
             if (params.length == 0) {
                 return null;
             }
 
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService spotify = api.getService();
-            ArtistsPager results = spotify.searchArtists(params[0]);
+            try {
+                spotify = new SpotifyApi().getService();
+                results = spotify.searchArtists(params[0]);
+            } catch (Exception e) {
+                return new AsyncTaskResult<List<Artist>>(e);
+            }
 
-            return results.artists != null ? results.artists.items : null;
+            return results.artists != null ? new AsyncTaskResult<List<Artist>>(results.artists.items) : null;
         }
 
         @Override
-        protected void onPostExecute(List<Artist> result) {
+        protected void onPostExecute(AsyncTaskResult<List<Artist>> response) {
             String artistImage = "";
+            List<Artist> result = response.getResult();
 
             mListAdapter.clear();
 
@@ -146,7 +185,11 @@ public class MainActivityFragment extends Fragment {
                     mListAdapter.add(new ListItem(artist.id, artistImage, artist.name, ""));
                 }
             } else {
-                Toast.makeText(getActivity(), "Artist not found", Toast.LENGTH_SHORT).show();
+                if (response.getError() != null) {
+                    Toast.makeText(getActivity(), response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "Artist not found", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
