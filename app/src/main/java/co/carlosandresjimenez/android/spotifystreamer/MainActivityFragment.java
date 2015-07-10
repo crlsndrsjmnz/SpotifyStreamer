@@ -1,18 +1,18 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ImageView;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -20,9 +20,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.OnEditorAction;
-import butterknife.OnFocusChange;
 import butterknife.OnItemClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -42,12 +39,24 @@ public class MainActivityFragment extends Fragment {
 
     @Bind(R.id.artist_resut_list)
     ListView listOfArtists;
-    @Bind(R.id.artist_search_bar)
-    TextView artistSearchBar;
-    @Bind(R.id.search_button)
-    ImageView artistSearchButton;
+    SearchView artistSearchBar;
 
     private StreamerListAdapter mListAdapter;
+    private SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            if (!TextUtils.isEmpty(query)) {
+                searchArtist(query);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            return false;
+        }
+    };
 
     public MainActivityFragment() {
     }
@@ -57,33 +66,16 @@ public class MainActivityFragment extends Fragment {
         getTopTracks(mListAdapter.getItem(position).getId());
     }
 
-    @OnClick(R.id.search_button)
-    void onClickSearchArtist() {
-        searchArtist();
-    }
+    public void searchArtist(String query) {
 
-    @OnEditorAction(R.id.artist_search_bar)
-    boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
-            searchArtist();
-            return true;
-        }
-        return false;
-    }
+        Log.d(LOG_TAG, "searchArtist " + query);
 
-    @OnFocusChange(R.id.artist_search_bar)
-    void onFocusChange(View v, boolean hasFocus) {
-        if (!hasFocus) {
-            searchArtist();
-        }
-    }
-
-    public void searchArtist() {
-
-        Log.d(LOG_TAG, "searchArtist " + artistSearchBar.getText().toString());
+        artistSearchBar.clearFocus();
+        InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        in.hideSoftInputFromWindow(artistSearchBar.getWindowToken(), 0);
 
         FetchArtistsTask artistsTask = new FetchArtistsTask();
-        artistsTask.execute(artistSearchBar.getText().toString());
+        artistsTask.execute(query);
     }
 
     public void getTopTracks(String id) {
@@ -100,6 +92,9 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
+
+        artistSearchBar = (SearchView) rootView.findViewById(R.id.search_box);
+        artistSearchBar.setOnQueryTextListener(onQueryTextListener);
 
         ArrayList<ListItem> mArtistList;
         int artistListPosition = 0;

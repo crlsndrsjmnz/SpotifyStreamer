@@ -2,45 +2,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivityFragment">
 
-    <RelativeLayout
-        android:id="@+id/search_frame"
+    <android.support.v7.widget.SearchView
+        android:id="@+id/search_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/artist_search_bar"
-            android:imeOptions="actionSearch"
-            android:singleLine="true" />
-
-        <ImageView
-            android:id="@+id/search_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/ic_search_grey600_24dp"
-            android:layout_alignRight="@+id/artist_search_bar" />
-
-    </RelativeLayout>
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:iconifiedByDefault="false"
+        android:queryHint="Search for an artist"></android.support.v7.widget.SearchView>
 
     <ListView
+        android:id="@+id/artist_resut_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/artist_resut_list"
-        android:layout_below="@+id/search_frame"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/search_box" />
 
 
 </RelativeLayout>
