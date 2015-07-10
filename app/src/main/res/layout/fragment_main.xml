@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
         android:iconifiedByDefault="false"
-        android:queryHint="Search for an artist"></android.support.v7.widget.SearchView>
+        android:queryHint="@string/search_box_hint"></android.support.v7.widget.SearchView>
 
     <ListView
         android:id="@+id/artist_resut_list"

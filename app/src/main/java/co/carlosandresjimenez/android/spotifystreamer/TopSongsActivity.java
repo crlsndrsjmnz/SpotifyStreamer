@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -39,26 +38,6 @@ public class TopSongsActivity extends ActionBarActivity {
         setContentView(R.layout.activity_detail);
     }
 
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            //startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class TopSongsFragment extends Fragment {
 
         private final String LOG_TAG = TopSongsFragment.class.getSimpleName();
@@ -113,7 +92,8 @@ public class TopSongsActivity extends ActionBarActivity {
                 mArtistIdStr = intent.getStringExtra(Intent.EXTRA_TEXT);
             }
 
-            searchTopTracks();
+            if (mListAdapter.getCount() == 0)
+                searchTopTracks();
 
             return rootView;
         }
@@ -127,8 +107,6 @@ public class TopSongsActivity extends ActionBarActivity {
         }
 
         public void searchTopTracks() {
-
-            Log.d(LOG_TAG, "searchTopTracks " + mArtistIdStr);
 
             if (mArtistIdStr != null && mArtistIdStr.compareTo("") != 0) {
                 FetchTopSongsTask artistsTask = new FetchTopSongsTask();

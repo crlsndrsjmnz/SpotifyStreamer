@@ -67,9 +67,6 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void searchArtist(String query) {
-
-        Log.d(LOG_TAG, "searchArtist " + query);
-
         artistSearchBar.clearFocus();
         InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         in.hideSoftInputFromWindow(artistSearchBar.getWindowToken(), 0);
@@ -79,9 +76,6 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void getTopTracks(String id) {
-
-        Log.d(LOG_TAG, "getTopTracks " + id);
-
         Intent topSongsIntent = new Intent(getActivity(), TopSongsActivity.class);
         topSongsIntent.putExtra(Intent.EXTRA_TEXT, id);
         startActivity(topSongsIntent);

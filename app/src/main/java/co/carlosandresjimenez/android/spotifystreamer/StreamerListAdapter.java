@@ -62,18 +62,6 @@ public class StreamerListAdapter extends BaseAdapter {
         return items;
     }
 
-    /*
-     * Replaces the items in the adapter with those in this list
-     * @param items The items to set into the adapter.
-     */
-    public void addAll(ArrayList<ListItem> items) {
-        clear();
-
-        for (int i = 0; i < items.size(); i++) {
-            add(items.get(i));
-        }
-    }
-
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder holder;
