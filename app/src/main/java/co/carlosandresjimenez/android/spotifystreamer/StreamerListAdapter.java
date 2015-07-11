@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,65 +18,51 @@ import butterknife.ButterKnife;
 /**
  * Created by carlosjimenez on 7/3/15.
  */
-public class StreamerListAdapter extends BaseAdapter {
+public class StreamerListAdapter extends ArrayAdapter<ListItem> {
 
     private final String LOG_TAG = StreamerListAdapter.class.getSimpleName();
-    private final LayoutInflater inflater;
+
     private ArrayList<ListItem> items;
 
-    public StreamerListAdapter(ArrayList<ListItem> items, Context context) {
-        this.items = items;
-        inflater = LayoutInflater.from(context);
-    }
-
-    @Override
-    public int getCount() {
-        return items.size();
-    }
-
-    @Override
-    public ListItem getItem(int position) {
-        return items.get(position);
-    }
-
-    public boolean add(ListItem item) {
-        boolean returnValue = items.add(item);
-        notifyDataSetChanged();
-        return returnValue;
-    }
-
-    public void clear() {
-        items.clear();
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
     /**
-     * Gets all the items in this adapter as an {@code ArrayList}
+     * This is our own custom constructor (it doesn't mirror a superclass constructor).
+     * The context is used to inflate the layout file, and the List is the data we want
+     * to populate into the lists
+     *
+     * @param context The current context. Used to inflate the layout file.
+     * @param items   A List of ListItems objects to display in a list
      */
+    public StreamerListAdapter(Context context, ArrayList<ListItem> items) {
+        super(context, 0, items);
+        this.items = items;
+    }
+
     public ArrayList<ListItem> getAllItems() {
         return items;
     }
 
+    /**
+     * Provides a view for an AdapterView (ListView, GridView, etc.)
+     *
+     * @param position    The AdapterView position that is requesting a view
+     * @param view        The recycled view to populate.
+     * @param parent      The parent ViewGroup that is used for inflation.
+     * @return The View for the position in the AdapterView.
+     */
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder holder;
         if (view != null) {
             holder = (ViewHolder) view.getTag();
         } else {
-            view = inflater.inflate(R.layout.list_detail_main, parent, false);
+            view = LayoutInflater.from(getContext()).inflate(R.layout.list_detail_main, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
-        if (items != null) {
-            ListItem item = items.get(position);
-
-            Picasso.with(inflater.getContext())
+        ListItem item = getItem(position);
+        if (item != null) {
+            Picasso.with(LayoutInflater.from(getContext()).getContext())
                     .load(item.getImageUrl())
                     .placeholder(R.drawable.ic_artist)
                     .error(R.drawable.ic_artist)

@@ -9,8 +9,8 @@ import android.os.Parcelable;
 public class ListItem implements Parcelable {
 
     public static final Parcelable.Creator<ListItem> CREATOR = new Parcelable.Creator<ListItem>() {
-        public ListItem createFromParcel(Parcel orig) {
-            return new ListItem(orig);
+        public ListItem createFromParcel(Parcel parcel) {
+            return new ListItem(parcel);
         }
 
         public ListItem[] newArray(int size) {
@@ -29,11 +29,11 @@ public class ListItem implements Parcelable {
         this.description = description;
     }
 
-    public ListItem(Parcel orig) {
-        this.name = orig.readString();
-        this.id = orig.readString();
-        this.imageUrl = orig.readString();
-        this.description = orig.readString();
+    public ListItem(Parcel parcel) {
+        this.name = parcel.readString();
+        this.id = parcel.readString();
+        this.imageUrl = parcel.readString();
+        this.description = parcel.readString();
     }
 
     @Override
@@ -84,10 +84,10 @@ public class ListItem implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(id);
-        dest.writeString(imageUrl);
-        dest.writeString(description);
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(name);
+        parcel.writeString(id);
+        parcel.writeString(imageUrl);
+        parcel.writeString(description);
     }
 }

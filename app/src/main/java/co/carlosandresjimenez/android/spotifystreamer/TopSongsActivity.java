@@ -47,18 +47,14 @@ public class TopSongsActivity extends ActionBarActivity {
 
         @Bind(R.id.artist_top_songs_list)
         ListView listOfTopSongs;
+        ArrayList<ListItem> mSongList;
+        int songsListPosition = 0;
         private String mArtistIdStr;
         private StreamerListAdapter mListAdapter;
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            View rootView = inflater.inflate(R.layout.artist_detail, container, false);
-            ButterKnife.bind(this, rootView);
-
-            ArrayList<ListItem> mSongList;
-            int songsListPosition = 0;
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
 
             if (savedInstanceState != null) {
 
@@ -75,9 +71,18 @@ public class TopSongsActivity extends ActionBarActivity {
                 mSongList = new ArrayList<ListItem>();
             }
 
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+
+            View rootView = inflater.inflate(R.layout.artist_detail, container, false);
+            ButterKnife.bind(this, rootView);
+
             // The ArrayAdapter will take data from a source and
             // use it to populate the ListView it's attached to.
-            mListAdapter = new StreamerListAdapter(mSongList, getActivity());
+            mListAdapter = new StreamerListAdapter(getActivity(), mSongList);
 
             if (listOfTopSongs != null) {
                 listOfTopSongs.setAdapter(mListAdapter);
@@ -92,6 +97,7 @@ public class TopSongsActivity extends ActionBarActivity {
                 mArtistIdStr = intent.getStringExtra(Intent.EXTRA_TEXT);
             }
 
+            // If the adapter is empty, look for the tracks.
             if (mListAdapter.getCount() == 0)
                 searchTopTracks();
 

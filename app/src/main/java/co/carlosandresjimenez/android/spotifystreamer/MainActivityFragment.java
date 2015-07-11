@@ -41,6 +41,9 @@ public class MainActivityFragment extends Fragment {
     ListView listOfArtists;
     SearchView artistSearchBar;
 
+    ArrayList<ListItem> mArtistList;
+    int artistListPosition = 0;
+
     private StreamerListAdapter mListAdapter;
     private SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
         @Override
@@ -82,19 +85,10 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ButterKnife.bind(this, rootView);
-
-        artistSearchBar = (SearchView) rootView.findViewById(R.id.search_box);
-        artistSearchBar.setOnQueryTextListener(onQueryTextListener);
-
-        ArrayList<ListItem> mArtistList;
-        int artistListPosition = 0;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-
             if (savedInstanceState.containsKey(KEY_ARTISTS_VIEW_STATE)) {
                 mArtistList = savedInstanceState.getParcelableArrayList(KEY_ARTISTS_VIEW_STATE);
             } else {
@@ -107,10 +101,20 @@ public class MainActivityFragment extends Fragment {
         } else {
             mArtistList = new ArrayList<ListItem>();
         }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        ButterKnife.bind(this, rootView);
+
+        artistSearchBar = (SearchView) rootView.findViewById(R.id.search_box);
+        artistSearchBar.setOnQueryTextListener(onQueryTextListener);
 
         // The ArrayAdapter will take data from a source and
         // use it to populate the ListView it's attached to.
-        mListAdapter = new StreamerListAdapter(mArtistList, getActivity());
+        mListAdapter = new StreamerListAdapter(getActivity(), mArtistList);
 
         if (listOfArtists != null) {
             listOfArtists.setAdapter(mListAdapter);
