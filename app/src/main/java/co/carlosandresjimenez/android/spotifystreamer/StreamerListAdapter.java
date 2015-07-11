@@ -1,6 +1,7 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,15 +62,23 @@ public class StreamerListAdapter extends ArrayAdapter<ListItem> {
         }
 
         ListItem item = getItem(position);
-        if (item != null) {
-            Picasso.with(LayoutInflater.from(getContext()).getContext())
-                    .load(item.getImageUrl())
-                    .placeholder(R.drawable.ic_artist)
-                    .error(R.drawable.ic_artist)
-                    .into(holder.item_image);
+        Uri imgUri;
 
-            holder.item_name.setText(item.getName());
-            holder.item_description.setText(item.getDescription());
+        if (item != null) {
+            try {
+                imgUri = Uri.parse(item.getImageUrl());
+
+                Picasso.with(LayoutInflater.from(getContext()).getContext())
+                        .load(imgUri)
+                        .placeholder(R.drawable.ic_artist)
+                        .error(R.drawable.ic_artist)
+                        .into(holder.item_image);
+
+                holder.item_name.setText(item.getName());
+                holder.item_description.setText(item.getDescription());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return view;

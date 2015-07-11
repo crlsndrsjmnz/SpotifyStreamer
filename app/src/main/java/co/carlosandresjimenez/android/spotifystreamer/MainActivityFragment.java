@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -39,6 +40,9 @@ public class MainActivityFragment extends Fragment {
 
     @Bind(R.id.artist_resut_list)
     ListView listOfArtists;
+    @Bind(R.id.artist_progress_bar)
+    ProgressBar progressBar;
+    @Bind(R.id.search_box)
     SearchView artistSearchBar;
 
     ArrayList<ListItem> mArtistList;
@@ -74,6 +78,8 @@ public class MainActivityFragment extends Fragment {
         InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         in.hideSoftInputFromWindow(artistSearchBar.getWindowToken(), 0);
 
+        progressBar.setVisibility(View.VISIBLE);
+
         FetchArtistsTask artistsTask = new FetchArtistsTask();
         artistsTask.execute(query);
     }
@@ -92,14 +98,14 @@ public class MainActivityFragment extends Fragment {
             if (savedInstanceState.containsKey(KEY_ARTISTS_VIEW_STATE)) {
                 mArtistList = savedInstanceState.getParcelableArrayList(KEY_ARTISTS_VIEW_STATE);
             } else {
-                mArtistList = new ArrayList<ListItem>();
+                mArtistList = new ArrayList<>();
             }
 
             if (savedInstanceState.containsKey(KEY_ARTISTS_LIST_POSITION)) {
                 artistListPosition = savedInstanceState.getInt(KEY_ARTISTS_LIST_POSITION);
             }
         } else {
-            mArtistList = new ArrayList<ListItem>();
+            mArtistList = new ArrayList<>();
         }
     }
 
@@ -109,7 +115,6 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, rootView);
 
-        artistSearchBar = (SearchView) rootView.findViewById(R.id.search_box);
         artistSearchBar.setOnQueryTextListener(onQueryTextListener);
 
         // The ArrayAdapter will take data from a source and
@@ -141,7 +146,6 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected AsyncTaskResult<List<Artist>> doInBackground(String... params) {
 
-            SpotifyService spotify;
             ArtistsPager results;
 
             // If there's no search string, there's nothing to look up.  Verify size of params.
@@ -150,29 +154,33 @@ public class MainActivityFragment extends Fragment {
             }
 
             try {
-                spotify = new SpotifyApi().getService();
+                SpotifyService spotify = new SpotifyApi().getService();
                 results = spotify.searchArtists(params[0]);
             } catch (Exception e) {
-                return new AsyncTaskResult<List<Artist>>(e);
+                e.printStackTrace();
+                return new AsyncTaskResult<>(e);
             }
 
-            return results.artists != null ? new AsyncTaskResult<List<Artist>>(results.artists.items) : null;
+            return results.artists != null ? new AsyncTaskResult<>(results.artists.items) : null;
         }
 
         @Override
         protected void onPostExecute(AsyncTaskResult<List<Artist>> response) {
-            String artistImage = "";
+            String artistImage;
             List<Artist> result = response.getResult();
 
             mListAdapter.clear();
 
+            progressBar.setVisibility(View.GONE);
+
             if (result != null && result.size() > 0) {
                 for (Artist artist : result) {
+
+                    artistImage = "";
+
                     if (artist.images.size() > 0) {
                         Image image = artist.images.get(artist.images.size() - 1);
                         artistImage = image.url;
-                    } else {
-                        artistImage = null;
                     }
 
                     mListAdapter.add(new ListItem(artist.id, artistImage, artist.name, ""));
