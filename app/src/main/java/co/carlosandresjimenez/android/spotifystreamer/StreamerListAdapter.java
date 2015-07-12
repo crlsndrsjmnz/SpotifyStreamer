@@ -45,9 +45,9 @@ public class StreamerListAdapter extends ArrayAdapter<ListItem> {
     /**
      * Provides a view for an AdapterView (ListView, GridView, etc.)
      *
-     * @param position    The AdapterView position that is requesting a view
-     * @param view        The recycled view to populate.
-     * @param parent      The parent ViewGroup that is used for inflation.
+     * @param position The AdapterView position that is requesting a view
+     * @param view     The recycled view to populate.
+     * @param parent   The parent ViewGroup that is used for inflation.
      * @return The View for the position in the AdapterView.
      */
     @Override

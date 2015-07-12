@@ -33,8 +33,9 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class MainActivityFragment extends Fragment {
 
+    public static final String KEY_ARTIST_ID = "KEY_ARTIST_ID";
+    public static final String KEY_ARTIST_NAME = "KEY_ARTIST_NAME";
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-
     private final String KEY_ARTISTS_VIEW_STATE = "KEY_ARTISTS_VIEW_STATE";
     private final String KEY_ARTISTS_LIST_POSITION = "KEY_ARTISTS_LIST_POSITION";
 
@@ -70,7 +71,7 @@ public class MainActivityFragment extends Fragment {
 
     @OnItemClick(R.id.artist_resut_list)
     void onSelectArtist(int position) {
-        getTopTracks(mListAdapter.getItem(position).getId());
+        getTopTracks(mListAdapter.getItem(position));
     }
 
     public void searchArtist(String query) {
@@ -84,9 +85,10 @@ public class MainActivityFragment extends Fragment {
         artistsTask.execute(query);
     }
 
-    public void getTopTracks(String id) {
+    public void getTopTracks(ListItem item) {
         Intent topSongsIntent = new Intent(getActivity(), TopSongsActivity.class);
-        topSongsIntent.putExtra(Intent.EXTRA_TEXT, id);
+        topSongsIntent.putExtra(KEY_ARTIST_ID, item.getId());
+        topSongsIntent.putExtra(KEY_ARTIST_NAME, item.getName());
         startActivity(topSongsIntent);
     }
 

@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +44,8 @@ public class TopSongsFragment extends Fragment {
 
     ArrayList<ListItem> mSongList;
     int songsListPosition = 0;
-    private String mArtistIdStr;
+    private String mArtistId;
+    private String mArtistName;
     private StreamerListAdapter mListAdapter;
 
     @Override
@@ -73,6 +76,9 @@ public class TopSongsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.artist_detail, container, false);
         ButterKnife.bind(this, rootView);
 
+        mArtistId = "";
+        mArtistName = "";
+
         // The ArrayAdapter will take data from a source and
         // use it to populate the ListView it's attached to.
         mListAdapter = new StreamerListAdapter(getActivity(), mSongList);
@@ -86,15 +92,26 @@ public class TopSongsFragment extends Fragment {
 
         // The detail Activity called via intent.  Inspect the intent for forecast data.
         Intent intent = getActivity().getIntent();
-        if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            mArtistIdStr = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (intent != null) {
+            if (intent.hasExtra(MainActivityFragment.KEY_ARTIST_ID))
+                mArtistId = intent.getStringExtra(MainActivityFragment.KEY_ARTIST_ID);
+
+            if (intent.hasExtra(MainActivityFragment.KEY_ARTIST_NAME))
+                mArtistName = intent.getStringExtra(MainActivityFragment.KEY_ARTIST_NAME);
         }
+
+        actionBarSetup();
 
         // If the adapter is empty, look for the tracks.
         if (mListAdapter.getCount() == 0)
             searchTopTracks();
 
         return rootView;
+    }
+
+    private void actionBarSetup() {
+        ActionBar ab = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        ab.setSubtitle(mArtistName);
     }
 
     @Override
@@ -107,11 +124,11 @@ public class TopSongsFragment extends Fragment {
 
     public void searchTopTracks() {
 
-        if (mArtistIdStr != null && mArtistIdStr.compareTo("") != 0) {
+        if (mArtistId != null && mArtistId.compareTo("") != 0) {
             songsProgressBar.setVisibility(View.VISIBLE);
 
             FetchTopSongsTask artistsTask = new FetchTopSongsTask();
-            artistsTask.execute(mArtistIdStr);
+            artistsTask.execute(mArtistId);
         } else {
             Log.e(LOG_TAG, "ID not found");
         }
