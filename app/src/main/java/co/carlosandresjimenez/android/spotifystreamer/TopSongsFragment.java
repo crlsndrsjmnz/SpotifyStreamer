@@ -1,11 +1,10 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,13 +26,11 @@ import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
-/**
- * Created by carlosjimenez on 7/11/15.
- */
 public class TopSongsFragment extends Fragment {
 
+    public static final String KEY_ARTIST_ID = "KEY_ARTIST_ID";
+    public static final String KEY_ARTIST_NAME = "KEY_ARTIST_NAME";
     private final String LOG_TAG = TopSongsFragment.class.getSimpleName();
-
     private final String KEY_SONGS_VIEW_STATE = "KEY_SONGS_VIEW_STATE";
     private final String KEY_SONGS_LIST_POSITION = "KEY_SONGS_LIST_POSITION";
 
@@ -78,6 +75,11 @@ public class TopSongsFragment extends Fragment {
 
         mArtistId = "";
         mArtistName = "";
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mArtistId = arguments.getString(KEY_ARTIST_ID);
+            mArtistName = arguments.getString(KEY_ARTIST_NAME);
+        }
 
         // The ArrayAdapter will take data from a source and
         // use it to populate the ListView it's attached to.
@@ -90,16 +92,6 @@ public class TopSongsFragment extends Fragment {
             Log.e(LOG_TAG, "ListOfTopSongs is NULL");
         }
 
-        // The detail Activity called via intent.  Inspect the intent for forecast data.
-        Intent intent = getActivity().getIntent();
-        if (intent != null) {
-            if (intent.hasExtra(MainActivityFragment.KEY_ARTIST_ID))
-                mArtistId = intent.getStringExtra(MainActivityFragment.KEY_ARTIST_ID);
-
-            if (intent.hasExtra(MainActivityFragment.KEY_ARTIST_NAME))
-                mArtistName = intent.getStringExtra(MainActivityFragment.KEY_ARTIST_NAME);
-        }
-
         actionBarSetup();
 
         // If the adapter is empty, look for the tracks.
@@ -110,8 +102,10 @@ public class TopSongsFragment extends Fragment {
     }
 
     private void actionBarSetup() {
-        ActionBar ab = ((ActionBarActivity) getActivity()).getSupportActionBar();
-        ab.setSubtitle(mArtistName);
+        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+
+        if (ab != null)
+            ab.setSubtitle(mArtistName);
     }
 
     @Override

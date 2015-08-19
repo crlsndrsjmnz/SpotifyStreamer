@@ -1,7 +1,6 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -33,8 +32,7 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class MainActivityFragment extends Fragment {
 
-    public static final String KEY_ARTIST_ID = "KEY_ARTIST_ID";
-    public static final String KEY_ARTIST_NAME = "KEY_ARTIST_NAME";
+
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private final String KEY_ARTISTS_VIEW_STATE = "KEY_ARTISTS_VIEW_STATE";
     private final String KEY_ARTISTS_LIST_POSITION = "KEY_ARTISTS_LIST_POSITION";
@@ -86,10 +84,14 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void getTopTracks(ListItem item) {
-        Intent topSongsIntent = new Intent(getActivity(), TopSongsActivity.class);
-        topSongsIntent.putExtra(KEY_ARTIST_ID, item.getId());
-        topSongsIntent.putExtra(KEY_ARTIST_NAME, item.getName());
-        startActivity(topSongsIntent);
+
+        if (item != null)
+            ((Callback) getActivity()).onItemSelected(item);
+
+//        Intent topSongsIntent = new Intent(getActivity(), TopSongsActivity.class);
+//        topSongsIntent.putExtra(KEY_ARTIST_ID, item.getId());
+//        topSongsIntent.putExtra(KEY_ARTIST_NAME, item.getName());
+//        startActivity(topSongsIntent);
     }
 
     @Override
@@ -139,6 +141,18 @@ public class MainActivityFragment extends Fragment {
 
         savedInstanceState.putInt(KEY_ARTISTS_LIST_POSITION, listOfArtists.getFirstVisiblePosition());
         savedInstanceState.putParcelableArrayList(KEY_ARTISTS_VIEW_STATE, mListAdapter.getAllItems());
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(ListItem item);
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, AsyncTaskResult<List<Artist>>> {
