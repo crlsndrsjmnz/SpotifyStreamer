@@ -32,8 +32,8 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class MainActivityFragment extends Fragment {
 
-
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+
     private final String KEY_ARTISTS_VIEW_STATE = "KEY_ARTISTS_VIEW_STATE";
     private final String KEY_ARTISTS_LIST_POSITION = "KEY_ARTISTS_LIST_POSITION";
 
@@ -69,7 +69,9 @@ public class MainActivityFragment extends Fragment {
 
     @OnItemClick(R.id.artist_resut_list)
     void onSelectArtist(int position) {
-        getTopTracks(mListAdapter.getItem(position));
+        ListItem item = mListAdapter.getItem(position);
+        if (item != null)
+            ((Callback) getActivity()).onArtistSelected(item);
     }
 
     public void searchArtist(String query) {
@@ -81,17 +83,6 @@ public class MainActivityFragment extends Fragment {
 
         FetchArtistsTask artistsTask = new FetchArtistsTask();
         artistsTask.execute(query);
-    }
-
-    public void getTopTracks(ListItem item) {
-
-        if (item != null)
-            ((Callback) getActivity()).onItemSelected(item);
-
-//        Intent topSongsIntent = new Intent(getActivity(), TopSongsActivity.class);
-//        topSongsIntent.putExtra(KEY_ARTIST_ID, item.getId());
-//        topSongsIntent.putExtra(KEY_ARTIST_NAME, item.getName());
-//        startActivity(topSongsIntent);
     }
 
     @Override
@@ -152,7 +143,7 @@ public class MainActivityFragment extends Fragment {
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        void onItemSelected(ListItem item);
+        void onArtistSelected(ListItem item);
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, AsyncTaskResult<List<Artist>>> {

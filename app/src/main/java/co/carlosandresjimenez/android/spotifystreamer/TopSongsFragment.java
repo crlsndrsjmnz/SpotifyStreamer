@@ -1,5 +1,6 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnItemClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Image;
@@ -37,7 +39,9 @@ public class TopSongsFragment extends Fragment {
     @Bind(R.id.artist_top_songs_list)
     ListView listOfTopSongs;
     @Bind(R.id.songs_progress_bar)
-    ProgressBar songsProgressBar;
+    ProgressBar searchProgressBar;
+
+    Activity mActivity;
 
     ArrayList<ListItem> mSongList;
     int songsListPosition = 0;
@@ -101,6 +105,19 @@ public class TopSongsFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActivity = activity;
+    }
+
+    @OnItemClick(R.id.artist_top_songs_list)
+    void onSelectTrack(int position) {
+        ListItem item = mListAdapter.getItem(position);
+        if (item != null)
+            ((Callback) mActivity).onSongSelected(item);
+    }
+
     private void actionBarSetup() {
         ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
 
@@ -119,13 +136,25 @@ public class TopSongsFragment extends Fragment {
     public void searchTopTracks() {
 
         if (mArtistId != null && mArtistId.compareTo("") != 0) {
-            songsProgressBar.setVisibility(View.VISIBLE);
+            searchProgressBar.setVisibility(View.VISIBLE);
 
             FetchTopSongsTask artistsTask = new FetchTopSongsTask();
             artistsTask.execute(mArtistId);
         } else {
             Log.e(LOG_TAG, "ID not found");
         }
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onSongSelected(ListItem item);
     }
 
     public class FetchTopSongsTask extends AsyncTask<String, Void, AsyncTaskResult<List<Track>>> {
@@ -163,10 +192,8 @@ public class TopSongsFragment extends Fragment {
             String artistImage;
 
             List<Track> result = response.getResult();
-
             mListAdapter.clear();
-
-            songsProgressBar.setVisibility(View.GONE);
+            searchProgressBar.setVisibility(View.GONE);
 
             if (result != null && result.size() > 0) {
                 for (Track track : result) {

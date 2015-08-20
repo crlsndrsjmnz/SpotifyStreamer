@@ -5,11 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 
-public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback, TopSongsFragment.Callback {
 
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-
 
     boolean mTwoPane;
 
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
     @Override
-    public void onItemSelected(ListItem item) {
+    public void onArtistSelected(ListItem item) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -63,5 +62,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             topSongsIntent.putExtra(TopSongsFragment.KEY_ARTIST_NAME, item.getName());
             startActivity(topSongsIntent);
         }
+    }
+
+    @Override
+    public void onSongSelected(ListItem item) {
+        // The device is using a large layout, so show the media player fragment as a dialog
+        Bundle arguments = new Bundle();
+        arguments.putString(SongPlayerFragment.TRACK_ID, item.getId());
+
+        SongPlayerFragment fragment = new SongPlayerFragment();
+        fragment.setArguments(arguments);
+        fragment.show(getSupportFragmentManager(), "dialog");
     }
 }

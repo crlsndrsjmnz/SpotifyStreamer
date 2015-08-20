@@ -1,9 +1,10 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-public class TopSongsActivity extends AppCompatActivity {
+public class TopSongsActivity extends AppCompatActivity implements TopSongsFragment.Callback {
 
     private final String LOG_TAG = TopSongsActivity.class.getSimpleName();
 
@@ -31,5 +32,10 @@ public class TopSongsActivity extends AppCompatActivity {
         }
     }
 
-
+    public void onSongSelected(ListItem item) {
+        // The device is using a small layout, so show the media player fragment as full screen
+        Intent intent = new Intent(this, SongPlayerActivity.class);
+        intent.putExtra(SongPlayerFragment.TRACK_ID, item.getId());
+        startActivity(intent);
+    }
 }
