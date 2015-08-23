@@ -3,6 +3,9 @@
     package="co.carlosandresjimenez.android.spotifystreamer">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:allowBackup="true"
@@ -27,7 +30,17 @@
                 android:value=".MainActivity" />
         </activity>
         <activity android:name=".SongPlayerActivity"></activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/SettingsTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
 
+        <service android:name=".MusicPlayerService"></service>
     </application>
 
 </manifest>

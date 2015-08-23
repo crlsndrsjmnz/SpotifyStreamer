@@ -1,8 +1,10 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +26,7 @@ import butterknife.ButterKnife;
 import butterknife.OnItemClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
@@ -113,9 +116,7 @@ public class TopSongsFragment extends Fragment {
 
     @OnItemClick(R.id.artist_top_songs_list)
     void onSelectTrack(int position) {
-        ListItem item = mListAdapter.getItem(position);
-        if (item != null)
-            ((Callback) mActivity).onSongSelected(item);
+        ((Callback) mActivity).onSongSelected(mListAdapter.getAllItems(), position);
     }
 
     private void actionBarSetup() {
@@ -145,6 +146,12 @@ public class TopSongsFragment extends Fragment {
         }
     }
 
+    private String getCountryCode() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return prefs.getString(getActivity().getString(R.string.pref_country_key),
+                getActivity().getString(R.string.pref_country_default));
+    }
+
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -154,7 +161,7 @@ public class TopSongsFragment extends Fragment {
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        void onSongSelected(ListItem item);
+        void onSongSelected(ArrayList<ListItem> items, int songSelection);
     }
 
     public class FetchTopSongsTask extends AsyncTask<String, Void, AsyncTaskResult<List<Track>>> {
@@ -175,7 +182,8 @@ public class TopSongsFragment extends Fragment {
                 SpotifyService spotify = new SpotifyApi().getService();
 
                 Map<String, Object> options = new HashMap<>();
-                options.put("country", "US");
+
+                options.put("country", getCountryCode());
                 results = spotify.getArtistTopTrack(params[0], options);
 
             } catch (Exception e) {
@@ -190,6 +198,7 @@ public class TopSongsFragment extends Fragment {
         protected void onPostExecute(AsyncTaskResult<List<Track>> response) {
             String albumStr;
             String artistImage;
+            String artistImageHq;
 
             List<Track> result = response.getResult();
             mListAdapter.clear();
@@ -200,6 +209,7 @@ public class TopSongsFragment extends Fragment {
 
                     albumStr = "";
                     artistImage = "";
+                    artistImageHq = "";
 
                     if (track.album != null) {
                         albumStr = track.album.name;
@@ -208,9 +218,31 @@ public class TopSongsFragment extends Fragment {
                             Image image = track.album.images.get(track.album.images.size() - 1);
                             artistImage = image.url;
                         }
+
+                        if (track.album.images != null && track.album.images.size() > 1) {
+                            Image image = track.album.images.get(track.album.images.size() - 2);
+                            artistImageHq = image.url;
+                        } else {
+                            artistImageHq = artistImage;
+                        }
                     }
 
-                    mListAdapter.add(new ListItem(track.id, artistImage, track.name, albumStr));
+                    String artistStr = "";
+                    boolean firstLoop = true;
+                    for (ArtistSimple artist : track.artists) {
+                        if (firstLoop) {
+                            artistStr = artist.name;
+                            firstLoop = false;
+                        } else {
+                            artistStr = artistStr + ", " + artist.name;
+                        }
+                    }
+
+                    String songUrl = "";
+                    if (track.external_urls.containsKey("spotify"))
+                        songUrl = track.external_urls.get("spotify");
+
+                    mListAdapter.add(new ListItem(track.id, artistImage, artistImageHq, track.name, albumStr, songUrl, artistStr, track.preview_url));
                 }
             } else {
                 if (response.getError() != null) {

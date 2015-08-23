@@ -1,87 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/player_container"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
+        android:id="@+id/player_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/grey"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="15dp">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/artist_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Coldplay" />
-
-        <TextView
-            android:id="@+id/album_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ghost stories" />
-
-        <ImageView
-            android:id="@+id/album_cover"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:src="@drawable/ic_artist" />
-
-        <TextView
-            android:id="@+id/song_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="A Sky Full of Stars" />
-
-        <SeekBar
-            android:id="@+id/song_seekBar"
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+            android:layout_height="match_parent"
+            android:background="@color/grey"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="15dp">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/artist_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/album_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <ImageView
-                android:id="@+id/previus_song_button"
+                android:id="@+id/album_cover"
+                android:layout_width="300dp"
+                android:layout_height="300dp" />
+
+            <TextView
+                android:id="@+id/song_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <SeekBar
+                    android:id="@+id/song_seekBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
+
+                <TextView
+                    android:id="@+id/song_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/song_seekBar"
+                    android:text="00:00"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:id="@+id/song_length"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/song_seekBar"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            </RelativeLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/material_blue_grey_900"
-                android:src="@android:drawable/ic_media_previous" />
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/play_song_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:background="@color/material_blue_grey_900"
-                android:src="@android:drawable/ic_media_play" />
+                <ImageView
+                    android:id="@+id/previous_song_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/material_blue_grey_900"
+                    android:src="@android:drawable/ic_media_previous" />
 
-            <ImageView
-                android:id="@+id/next_song_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:background="@color/material_blue_grey_900"
-                android:src="@android:drawable/ic_media_next" />
+                <ImageView
+                    android:id="@+id/play_song_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@color/material_blue_grey_900"
+                    android:clickable="true"
+                    android:src="@drawable/play_selector" />
 
+                <ImageView
+                    android:id="@+id/next_song_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@color/material_blue_grey_900"
+                    android:src="@android:drawable/ic_media_next" />
+
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/player_progress_bar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:indeterminate="true"
-        android:visibility="gone" />
-
-</RelativeLayout>
+        <ProgressBar
+            android:id="@+id/player_progress_bar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:indeterminate="true"
+            android:visibility="gone" />
+    </RelativeLayout>
+</ScrollView>

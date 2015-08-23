@@ -3,6 +3,10 @@ package co.carlosandresjimenez.android.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback, TopSongsFragment.Callback {
@@ -65,13 +69,42 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
     @Override
-    public void onSongSelected(ListItem item) {
+    public void onSongSelected(ArrayList<ListItem> items, int songSelection) {
         // The device is using a large layout, so show the media player fragment as a dialog
         Bundle arguments = new Bundle();
-        arguments.putString(SongPlayerFragment.TRACK_ID, item.getId());
+        arguments.putParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST, items);
+        arguments.putInt(Constants.INTENT_EXTRA_ID.TRACK_CURRENT_POSITION, songSelection);
 
         SongPlayerFragment fragment = new SongPlayerFragment();
         fragment.setArguments(arguments);
-        fragment.show(getSupportFragmentManager(), "dialog");
+        fragment.show(getSupportFragmentManager(), Constants.FRAGMENT_ID.SONGPLAYER_TAG);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+
+        if (id == R.id.action_player) {
+            startActivity(new Intent(this, SongPlayerActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

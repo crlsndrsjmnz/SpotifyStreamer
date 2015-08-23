@@ -5,10 +5,8 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="AppTheme.PopupPlayer">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
+    <!-- Settings activity theme. -->
+    <style name="SettingsTheme" parent="AppTheme">
     </style>
 
 </resources>
