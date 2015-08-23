@@ -24,19 +24,13 @@ import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 
-/**
- * Created by carlosjimenez on 8/22/15.
- */
 public class MusicPlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
 
-    private static final int PLAY_NOTIFICATION = 0;
-    private static final int PAUSE_NOTIFICATION = 1;
-    private static final String TEST_TRACK_NAME = "Artist - Song";
     private final String LOG_TAG = MusicPlayerService.class.getSimpleName();
-    //binder
+
     private final IBinder musicBind = new MusicPlayerBinder();
-    //String mTrackUrl;
+
     SongPlayerFragment fragment;
     boolean mIsPrepared = false;
     boolean mPlayRequested = false;
@@ -52,27 +46,25 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     PendingIntent pNextIntent;
     Bitmap icon;
     Bitmap defaultNotificationIcon;
-    //media player
+
     private MediaPlayer player;
-    //song list
     private ArrayList<ListItem> mSongList;
-    //current position
     private int songListPosition;
+
     private Target target = new Target() {
+
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-
             try {
                 setNotificationIcon(bitmap);
                 if (isPlayingSong())
-                    updateNotification(PAUSE_NOTIFICATION, getSongTitle());
+                    updateNotification(Constants.NOTIFICATION_ID.PAUSE_NOTIFICATION, getSongTitle());
                 else
-                    updateNotification(PLAY_NOTIFICATION, getSongTitle());
+                    updateNotification(Constants.NOTIFICATION_ID.PLAY_NOTIFICATION, getSongTitle());
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
 
         @Override
@@ -86,45 +78,37 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         }
     };
 
+    void attach(SongPlayerFragment fragment) {
+        this.fragment = fragment;
+    }
+
+    void detach() {
+        this.fragment = null;
+    }
+
     public void onCreate() {
-        //create the service
         super.onCreate();
 
-        Log.d(LOG_TAG, "^^^^^^^^^^^^^^ MusicPlayerService.onCreate");
-
-        //initialize position
         songListPosition = 0;
-        //create player
         player = new MediaPlayer();
-        //initialize
         initMusicPlayer();
 
         initNotification(getSongTitle());
     }
 
-    //activity will bind to service
     @Override
     public IBinder onBind(Intent intent) {
-
-        Log.d(LOG_TAG, "^^^^^^^^^^^^^^ MusicPlayerService.onBind");
-
         return musicBind;
     }
 
-    //release resources when unbind
     @Override
     public boolean onUnbind(Intent intent) {
-
-        Log.d(LOG_TAG, "^^^^^^^^^^^^^^ MusicPlayerService.onUnbind");
-
         return false;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        Log.d(LOG_TAG, "^^^^^^^^^^^^^^ MusicPlayerService.onDestroy");
 
         player.stop();
         player.release();
@@ -135,37 +119,24 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d(LOG_TAG, "^^^^^^^^^^^^^^ MusicPlayerService.onStartCommand");
-
         if (intent != null && intent.getAction() != null)
-            if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
-                Log.i(LOG_TAG, "Received Start Foreground Intent ");
-            } else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
-                Log.i(LOG_TAG, "Clicked Previous");
+            if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.PREV_ACTION)) {
                 previousSong();
-            } else if (intent.getAction().equals(Constants.ACTION.PLAY_ACTION)) {
-                Log.i(LOG_TAG, "Clicked Play");
+            } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.PLAY_ACTION)) {
                 playSong();
-            } else if (intent.getAction().equals(Constants.ACTION.PAUSE_ACTION)) {
-                Log.i(LOG_TAG, "Clicked Pause");
+            } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.PAUSE_ACTION)) {
                 pauseSong();
-            } else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
-                Log.i(LOG_TAG, "Clicked Next");
+            } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.NEXT_ACTION)) {
                 nextSong();
-            } else if (intent.getAction().equals(Constants.ACTION.STOPFOREGROUND_ACTION)) {
-                Log.i(LOG_TAG, "Received Stop Foreground Intent");
-                stopForeground(true);
-                stopSelf();
             }
         return START_STICKY;
     }
 
     public void initMusicPlayer() {
-        //set player properties
         player.setWakeMode(getApplicationContext(),
                 PowerManager.PARTIAL_WAKE_LOCK);
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        //set listeners
+
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
         player.setOnErrorListener(this);
@@ -181,29 +152,29 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     private void initNotification(String songTitle) {
 
         notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
+        notificationIntent.setAction(Constants.NOTIFICATION_ACTION.OPEN_PLAYER_ACTION);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         pendingIntent = PendingIntent.getActivity(this, 0,
                 notificationIntent, 0);
 
         previousIntent = new Intent(this, MusicPlayerService.class);
-        previousIntent.setAction(Constants.ACTION.PREV_ACTION);
+        previousIntent.setAction(Constants.NOTIFICATION_ACTION.PREV_ACTION);
         pPreviousIntent = PendingIntent.getService(this, 0,
                 previousIntent, 0);
 
         playIntent = new Intent(this, MusicPlayerService.class);
-        playIntent.setAction(Constants.ACTION.PLAY_ACTION);
+        playIntent.setAction(Constants.NOTIFICATION_ACTION.PLAY_ACTION);
         pPlayIntent = PendingIntent.getService(this, 0,
                 playIntent, 0);
 
         pauseIntent = new Intent(this, MusicPlayerService.class);
-        pauseIntent.setAction(Constants.ACTION.PAUSE_ACTION);
+        pauseIntent.setAction(Constants.NOTIFICATION_ACTION.PAUSE_ACTION);
         pPauseIntent = PendingIntent.getService(this, 0,
                 pauseIntent, 0);
 
         nextIntent = new Intent(this, MusicPlayerService.class);
-        nextIntent.setAction(Constants.ACTION.NEXT_ACTION);
+        nextIntent.setAction(Constants.NOTIFICATION_ACTION.NEXT_ACTION);
         pNextIntent = PendingIntent.getService(this, 0,
                 nextIntent, 0);
 
@@ -220,10 +191,9 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void updateNotification(int notificationType, String songTitle) {
-
         Notification notification;
 
-        if (notificationType == PLAY_NOTIFICATION)
+        if (notificationType == Constants.NOTIFICATION_ID.PLAY_NOTIFICATION)
             notification = getPlayNotification(songTitle);
         else
             notification = getPauseNotification(songTitle);
@@ -272,14 +242,6 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
                 .build();
     }
 
-    void attach(SongPlayerFragment fragment) {
-        this.fragment = fragment;
-    }
-
-    void detach() {
-        this.fragment = null;
-    }
-
     public void nextSong() {
         songListPosition++;
         if (mSongList.size() <= songListPosition)
@@ -320,16 +282,13 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         return title;
     }
 
-    //play a song
     public void prepareSong() {
-        //play
+
         player.reset();
         mIsPrepared = false;
         this.icon = defaultNotificationIcon;
 
         try {
-            Log.d(LOG_TAG, "^^^^^^^^^^^^^^ MusicPlayerService songListPosition:" + songListPosition + " - PreviewUrl: " + mSongList.get(songListPosition).getName());
-
             if (showNotifications())
                 Picasso.with(this)
                         .load(mSongList.get(songListPosition).getImageUrl())
@@ -342,12 +301,11 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         player.prepareAsync();
     }
 
-    //play song
     public void playSong() {
         if (isPrepared()) {
 
             if (showNotifications())
-                updateNotification(PAUSE_NOTIFICATION, getSongTitle());
+                updateNotification(Constants.NOTIFICATION_ID.PAUSE_NOTIFICATION, getSongTitle());
 
             player.start();
 
@@ -359,10 +317,9 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-    //pause song
     public void pauseSong() {
         if (showNotifications())
-            updateNotification(PLAY_NOTIFICATION, getSongTitle());
+            updateNotification(Constants.NOTIFICATION_ID.PLAY_NOTIFICATION, getSongTitle());
 
         player.pause();
     }
@@ -405,20 +362,17 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        // TODO Auto-generated method stub
         if (fragment != null)
             fragment.songCompleted();
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        //start playback
         mIsPrepared = true;
 
         if (mPlayRequested)
@@ -431,7 +385,6 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         return mIsPrepared;
     }
 
-    //binder
     public class MusicPlayerBinder extends Binder {
         MusicPlayerService getService() {
             return MusicPlayerService.this;

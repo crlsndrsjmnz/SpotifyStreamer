@@ -3,9 +3,6 @@ package co.carlosandresjimenez.android.spotifystreamer;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by carlosjimenez on 7/3/15.
- */
 public class ListItem implements Parcelable {
 
     public static final Parcelable.Creator<ListItem> CREATOR = new Parcelable.Creator<ListItem>() {

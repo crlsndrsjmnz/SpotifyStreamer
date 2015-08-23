@@ -22,10 +22,10 @@ public class TopSongsActivity extends AppCompatActivity implements TopSongsFragm
             // using a fragment transaction.
 
             Bundle arguments = new Bundle();
-            arguments.putString(TopSongsFragment.KEY_ARTIST_ID,
-                    getIntent().getStringExtra(TopSongsFragment.KEY_ARTIST_ID));
-            arguments.putString(TopSongsFragment.KEY_ARTIST_NAME,
-                    getIntent().getStringExtra(TopSongsFragment.KEY_ARTIST_NAME));
+            arguments.putString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID,
+                    getIntent().getStringExtra(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID));
+            arguments.putString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME,
+                    getIntent().getStringExtra(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME));
 
             TopSongsFragment fragment = new TopSongsFragment();
             fragment.setArguments(arguments);

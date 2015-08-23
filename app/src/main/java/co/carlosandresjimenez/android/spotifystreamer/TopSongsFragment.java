@@ -33,11 +33,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
 
 public class TopSongsFragment extends Fragment {
 
-    public static final String KEY_ARTIST_ID = "KEY_ARTIST_ID";
-    public static final String KEY_ARTIST_NAME = "KEY_ARTIST_NAME";
     private final String LOG_TAG = TopSongsFragment.class.getSimpleName();
-    private final String KEY_SONGS_VIEW_STATE = "KEY_SONGS_VIEW_STATE";
-    private final String KEY_SONGS_LIST_POSITION = "KEY_SONGS_LIST_POSITION";
 
     @Bind(R.id.artist_top_songs_list)
     ListView listOfTopSongs;
@@ -58,14 +54,14 @@ public class TopSongsFragment extends Fragment {
 
         if (savedInstanceState != null) {
 
-            if (savedInstanceState.containsKey(KEY_SONGS_VIEW_STATE)) {
-                mSongList = savedInstanceState.getParcelableArrayList(KEY_SONGS_VIEW_STATE);
+            if (savedInstanceState.containsKey(Constants.INTENT_EXTRA_ID.KEY_SONGS_VIEW_STATE)) {
+                mSongList = savedInstanceState.getParcelableArrayList(Constants.INTENT_EXTRA_ID.KEY_SONGS_VIEW_STATE);
             } else {
                 mSongList = new ArrayList<>();
             }
 
-            if (savedInstanceState.containsKey(KEY_SONGS_LIST_POSITION)) {
-                songsListPosition = savedInstanceState.getInt(KEY_SONGS_LIST_POSITION);
+            if (savedInstanceState.containsKey(Constants.INTENT_EXTRA_ID.KEY_SONGS_LIST_POSITION)) {
+                songsListPosition = savedInstanceState.getInt(Constants.INTENT_EXTRA_ID.KEY_SONGS_LIST_POSITION);
             }
         } else {
             mSongList = new ArrayList<>();
@@ -84,8 +80,8 @@ public class TopSongsFragment extends Fragment {
         mArtistName = "";
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mArtistId = arguments.getString(KEY_ARTIST_ID);
-            mArtistName = arguments.getString(KEY_ARTIST_NAME);
+            mArtistId = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID);
+            mArtistName = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME);
         }
 
         // The ArrayAdapter will take data from a source and
@@ -130,8 +126,8 @@ public class TopSongsFragment extends Fragment {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putInt(KEY_SONGS_LIST_POSITION, listOfTopSongs.getFirstVisiblePosition());
-        savedInstanceState.putParcelableArrayList(KEY_SONGS_VIEW_STATE, mListAdapter.getAllItems());
+        savedInstanceState.putInt(Constants.INTENT_EXTRA_ID.KEY_SONGS_LIST_POSITION, listOfTopSongs.getFirstVisiblePosition());
+        savedInstanceState.putParcelableArrayList(Constants.INTENT_EXTRA_ID.KEY_SONGS_VIEW_STATE, mListAdapter.getAllItems());
     }
 
     public void searchTopTracks() {

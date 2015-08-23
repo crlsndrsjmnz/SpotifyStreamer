@@ -1,8 +1,5 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
-/**
- * Created by carlosjimenez on 7/9/15.
- */
 public class AsyncTaskResult<T> {
     private T result;
     private Exception error;

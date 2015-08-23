@@ -1,10 +1,8 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -35,12 +33,10 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import co.carlosandresjimenez.android.spotifystreamer.MusicPlayerService.MusicPlayerBinder;
 
 public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener {
 
     private final String LOG_TAG = SongPlayerFragment.class.getSimpleName();
-
 
     @Bind(R.id.artist_name)
     TextView mTvArtistName;
@@ -62,28 +58,25 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     ImageView mBtPlaySong;
     @Bind(R.id.next_song_button)
     ImageView mBtNextSong;
+    @Bind(R.id.share_song_button)
+    ImageView mBtShareSong;
     @Bind(R.id.player_progress_bar)
     ProgressBar playerProgressBar;
 
-    boolean mPlaySongRequested;
-    boolean mMediaPlayerReady;
     Handler mHandler;
 
-    //service
     private MusicPlayerService musicPlayerSrv;
     private Intent playIntent;
-    //binding
     private boolean musicBound = false;
     private boolean gotSongList = true;
+    private boolean isDialog = false;
 
     private ShareActionProvider mShareActionProvider;
     private String mShareDetails;
 
-    //    private String mSongUrl;
-//    private String mTrackId;
     private ArrayList<ListItem> mSongList;
     private int mCurrentSong;
-    private int HANDLER_DELAY_MILLISECONDS = 100;
+
     private Runnable moveSeekBarThread = new Runnable() {
 
         public void run() {
@@ -98,7 +91,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                 mTvSongProgress.setText(formatDuration(newSongPosition));
 
                 // Looping the thread after 0.1 seconds
-                mHandler.postDelayed(this, HANDLER_DELAY_MILLISECONDS);
+                mHandler.postDelayed(this, Constants.PLAYER_SERVICE.SEEK_BAR_REFRESH_RATE);
             } else {
                 int songDuration = musicPlayerSrv.getDuration();
 
@@ -110,22 +103,16 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
             }
         }
     };
-    //connect to the service
+
     private ServiceConnection musicPlayerConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
-            Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% ServiceConnection.onServiceConnected");
+            MusicPlayerService.MusicPlayerBinder binder = (MusicPlayerService.MusicPlayerBinder) service;
 
-            MusicPlayerBinder binder = (MusicPlayerBinder) service;
-            //get service
             musicPlayerSrv = binder.getService();
             musicBound = true;
-
-            //Log.d(LOG_TAG, "%%%%%%%%%%%% musicPlayerSrv.getSongUrl " + musicPlayerSrv.getSongUrl());
-            //pass list
-            //musicPlayerSrv.setList(songList);
 
             if (gotSongList)
                 setSongList();
@@ -151,23 +138,10 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
         setHasOptionsMenu(true);
     }
 
-    public void setCurrentSong(int currentSong) {
-        this.mCurrentSong = currentSong;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onAttach");
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onCreate");
 
         if (playIntent == null) {
             playIntent = new Intent(getActivity().getApplicationContext(), MusicPlayerService.class);
@@ -179,8 +153,6 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onCreateView");
 
         View rootView = inflater.inflate(R.layout.song_player, container, false);
         ButterKnife.bind(this, rootView);
@@ -195,8 +167,6 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                 mSongList = arguments.getParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST);
                 mCurrentSong = arguments.getInt(Constants.INTENT_EXTRA_ID.TRACK_CURRENT_POSITION);
             } else {
-                Log.e(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onCreateView: Track List empty!!");
-
                 gotSongList = false;
             }
         }
@@ -210,78 +180,25 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onActivityCreated");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onStart mTrackId: " + mSongList.get(mCurrentSong).getId());
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onResume mTrackId: " + mSongList.get(mCurrentSong).getId());
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onPause");
-
         mHandler.removeCallbacks(moveSeekBarThread);
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onStop");
-
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onDestroyView");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onDestroy");
-
-        //getActivity().getApplicationContext().unbindService(musicPlayerConnection);
-
         musicPlayerSrv.detach();
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onDetach");
-
-    }
-
-
-    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onCreateDialog");
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        isDialog = true;
 
         return dialog;
     }
@@ -290,33 +207,29 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onSaveInstanceState");
-
         savedInstanceState.putInt(Constants.INTENT_EXTRA_ID.TRACK_CURRENT_POSITION, mCurrentSong);
         savedInstanceState.putParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST, mSongList);
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-
-//        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%% SongPlayerFragment.onDismiss");
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.song_player, menu);
+        if (!isDialog) {
 
-        // Retrieve the share menu item
-        MenuItem menuItem = menu.findItem(R.id.action_share);
+            mBtShareSong.setVisibility(View.GONE);
 
-        // Get the provider and hold onto it to set/change the share intent.
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+            // Inflate the menu; this adds items to the action bar if it is present.
+            inflater.inflate(R.menu.song_player, menu);
 
-        // If onLoadFinished happens before this, we can go ahead and set the share intent now.
-        if (mShareDetails != null)
-            mShareActionProvider.setShareIntent(createShareForecastIntent());
+            // Retrieve the share menu item
+            MenuItem menuItem = menu.findItem(R.id.action_share);
+
+            // Get the provider and hold onto it to set/change the share intent.
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+            // If onLoadFinished happens before this, we can go ahead and set the share intent now.
+            if (mShareDetails != null)
+                mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
     }
 
     private Intent createShareForecastIntent() {
@@ -337,7 +250,10 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                     mSongList.get(mCurrentSong).getName() + " - " +
                     mSongList.get(mCurrentSong).getSongUrl();
 
-            if (mShareActionProvider != null) {
+            if (isDialog)
+                mBtShareSong.setVisibility(View.VISIBLE);
+
+            if (!isDialog && mShareActionProvider != null) {
                 mShareActionProvider.setShareIntent(createShareForecastIntent());
             }
 
@@ -377,6 +293,12 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
         }
     }
 
+    @OnClick(R.id.share_song_button)
+    void onShareSong() {
+        Intent intent = createShareForecastIntent();
+        startActivity(intent);
+    }
+
     public void playSong() {
         musicPlayerSrv.playSong();
     }
@@ -395,7 +317,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
 
     public void updateSongTimer() {
         mHandler.removeCallbacks(moveSeekBarThread);
-        mHandler.postDelayed(moveSeekBarThread, HANDLER_DELAY_MILLISECONDS);
+        mHandler.postDelayed(moveSeekBarThread, Constants.PLAYER_SERVICE.SEEK_BAR_REFRESH_RATE);
     }
 
     @Override
@@ -419,8 +341,6 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     public void updateUI() {
 
         try {
-            Log.d(LOG_TAG, "************* updateUI: " + mSongList.get(mCurrentSong).toString());
-
             playerProgressBar.setVisibility(View.INVISIBLE);
 
             mTvArtistName.setText(mSongList.get(mCurrentSong).getArtist());
@@ -440,7 +360,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                 if (musicPlayerSrv.isPlayingSong())
                     mBtPlaySong.setSelected(true);
 
-                mHandler.postDelayed(moveSeekBarThread, HANDLER_DELAY_MILLISECONDS);
+                mHandler.postDelayed(moveSeekBarThread, Constants.PLAYER_SERVICE.SEEK_BAR_REFRESH_RATE);
             }
 
         } catch (Exception e) {
@@ -450,14 +370,15 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     }
 
     private void setSongList() {
-        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%%%%% setSongList - mCurrentSong: " + mCurrentSong + " - mSongName: " + mSongList.get(mCurrentSong).getName());
-        Log.d(LOG_TAG, "%%%%%%%%%%%%%%%%%%%%%%% setSongList - musicBound: " + musicBound + " - mSongUrl: " + mSongList.get(mCurrentSong).getPreviewUrl());
-
         if (musicBound && !mSongList.isEmpty()) {
             musicPlayerSrv.setSongList(mSongList);
             musicPlayerSrv.setSongListPosition(mCurrentSong);
             musicPlayerSrv.prepareSong();
         }
+    }
+
+    public void setCurrentSong(int currentSong) {
+        this.mCurrentSong = currentSong;
     }
 
     private String formatDuration(long duration) {

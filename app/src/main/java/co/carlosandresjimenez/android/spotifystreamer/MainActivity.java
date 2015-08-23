@@ -11,7 +11,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback, TopSongsFragment.Callback {
 
-    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private final String LOG_TAG = MainActivity.class.getSimpleName();
 
     boolean mTwoPane;
@@ -36,12 +35,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             // fragment transaction.
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.artist_detail_container, new TopSongsFragment(), DETAILFRAGMENT_TAG)
+                        .replace(R.id.artist_detail_container, new TopSongsFragment(), Constants.FRAGMENT_ID.DETAILFRAGMENT_TAG)
                         .commit();
             }
         } else {
             mTwoPane = false;
         }
+
+        if (getIntent() != null && getIntent().getAction().equals(Constants.NOTIFICATION_ACTION.OPEN_PLAYER_ACTION))
+            openPlayer();
+
     }
 
     @Override
@@ -51,19 +54,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle args = new Bundle();
-            args.putString(TopSongsFragment.KEY_ARTIST_ID, item.getId());
-            args.putString(TopSongsFragment.KEY_ARTIST_NAME, item.getName());
+            args.putString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID, item.getId());
+            args.putString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME, item.getName());
 
             TopSongsFragment fragment = new TopSongsFragment();
             fragment.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.artist_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .replace(R.id.artist_detail_container, fragment, Constants.FRAGMENT_ID.DETAILFRAGMENT_TAG)
                     .commit();
         } else {
             Intent topSongsIntent = new Intent(this, TopSongsActivity.class);
-            topSongsIntent.putExtra(TopSongsFragment.KEY_ARTIST_ID, item.getId());
-            topSongsIntent.putExtra(TopSongsFragment.KEY_ARTIST_NAME, item.getName());
+            topSongsIntent.putExtra(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID, item.getId());
+            topSongsIntent.putExtra(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME, item.getName());
             startActivity(topSongsIntent);
         }
     }
@@ -72,8 +75,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     public void onSongSelected(ArrayList<ListItem> items, int songSelection) {
         // The device is using a large layout, so show the media player fragment as a dialog
         Bundle arguments = new Bundle();
-        arguments.putParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST, items);
-        arguments.putInt(Constants.INTENT_EXTRA_ID.TRACK_CURRENT_POSITION, songSelection);
+
+        if (items != null) {
+            arguments.putParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST, items);
+            arguments.putInt(Constants.INTENT_EXTRA_ID.TRACK_CURRENT_POSITION, songSelection);
+        }
 
         SongPlayerFragment fragment = new SongPlayerFragment();
         fragment.setArguments(arguments);
@@ -101,10 +107,17 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         }
 
         if (id == R.id.action_player) {
-            startActivity(new Intent(this, SongPlayerActivity.class));
+            openPlayer();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openPlayer() {
+        if (mTwoPane) {
+            onSongSelected(null, 0);
+        } else
+            startActivity(new Intent(this, SongPlayerActivity.class));
     }
 }

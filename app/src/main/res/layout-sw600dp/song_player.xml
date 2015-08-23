@@ -98,6 +98,14 @@
                     android:background="@color/material_blue_grey_900"
                     android:src="@android:drawable/ic_media_next" />
 
+                <ImageView
+                    android:id="@+id/share_song_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:background="@color/material_blue_grey_900"
+                    android:src="@android:drawable/ic_menu_share"
+                    android:visibility="invisible" />
             </LinearLayout>
         </LinearLayout>
 

@@ -34,9 +34,6 @@ public class MainActivityFragment extends Fragment {
 
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
-    private final String KEY_ARTISTS_VIEW_STATE = "KEY_ARTISTS_VIEW_STATE";
-    private final String KEY_ARTISTS_LIST_POSITION = "KEY_ARTISTS_LIST_POSITION";
-
     @Bind(R.id.artist_resut_list)
     ListView listOfArtists;
     @Bind(R.id.artist_progress_bar)
@@ -90,14 +87,14 @@ public class MainActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_ARTISTS_VIEW_STATE)) {
-                mArtistList = savedInstanceState.getParcelableArrayList(KEY_ARTISTS_VIEW_STATE);
+            if (savedInstanceState.containsKey(Constants.STATE_ID.KEY_ARTISTS_VIEW_STATE)) {
+                mArtistList = savedInstanceState.getParcelableArrayList(Constants.STATE_ID.KEY_ARTISTS_VIEW_STATE);
             } else {
                 mArtistList = new ArrayList<>();
             }
 
-            if (savedInstanceState.containsKey(KEY_ARTISTS_LIST_POSITION)) {
-                artistListPosition = savedInstanceState.getInt(KEY_ARTISTS_LIST_POSITION);
+            if (savedInstanceState.containsKey(Constants.STATE_ID.KEY_ARTISTS_LIST_POSITION)) {
+                artistListPosition = savedInstanceState.getInt(Constants.STATE_ID.KEY_ARTISTS_LIST_POSITION);
             }
         } else {
             mArtistList = new ArrayList<>();
@@ -130,8 +127,8 @@ public class MainActivityFragment extends Fragment {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putInt(KEY_ARTISTS_LIST_POSITION, listOfArtists.getFirstVisiblePosition());
-        savedInstanceState.putParcelableArrayList(KEY_ARTISTS_VIEW_STATE, mListAdapter.getAllItems());
+        savedInstanceState.putInt(Constants.STATE_ID.KEY_ARTISTS_LIST_POSITION, listOfArtists.getFirstVisiblePosition());
+        savedInstanceState.putParcelableArrayList(Constants.STATE_ID.KEY_ARTISTS_VIEW_STATE, mListAdapter.getAllItems());
     }
 
     /**
