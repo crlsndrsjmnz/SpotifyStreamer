@@ -42,15 +42,16 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     PendingIntent pPlayIntent;
     Intent pauseIntent;
     PendingIntent pPauseIntent;
+    Intent stopIntent;
+    PendingIntent pStopIntent;
     Intent nextIntent;
     PendingIntent pNextIntent;
     Bitmap icon;
     Bitmap defaultNotificationIcon;
-
+    NotificationManager mNotificationManager;
     private MediaPlayer player;
     private ArrayList<ListItem> mSongList;
     private int songListPosition;
-
     private Target target = new Target() {
 
         @Override
@@ -110,22 +111,25 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
 
-        detach();
-        player.stop();
-        player.release();
-        stopForeground(true);
-        stopSelf();
+        destroyService();
     }
 
     @Override
-    public void onTaskRemoved(Intent rootIntent) {
+    public void onTaskRemoved(Intent intent) {
+        destroyService();
+
+        super.onTaskRemoved(intent);
+    }
+
+    public void destroyService() {
         detach();
         player.stop();
         player.release();
+
+        mNotificationManager.cancel(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE);
+
         stopForeground(true);
         stopSelf();
-
-        super.onTaskRemoved(rootIntent);
     }
 
     @Override
@@ -136,6 +140,8 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
                 previousSong();
             } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.PLAY_ACTION)) {
                 playSong();
+            } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.STOP_ACTION)) {
+                stopPlayer();
             } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.PAUSE_ACTION)) {
                 pauseSong();
             } else if (intent.getAction().equals(Constants.NOTIFICATION_ACTION.NEXT_ACTION)) {
@@ -185,6 +191,11 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         pPauseIntent = PendingIntent.getService(this, 0,
                 pauseIntent, 0);
 
+        stopIntent = new Intent(this, MusicPlayerService.class);
+        stopIntent.setAction(Constants.NOTIFICATION_ACTION.STOP_ACTION);
+        pStopIntent = PendingIntent.getService(this, 0,
+                stopIntent, 0);
+
         nextIntent = new Intent(this, MusicPlayerService.class);
         nextIntent.setAction(Constants.NOTIFICATION_ACTION.NEXT_ACTION);
         pNextIntent = PendingIntent.getService(this, 0,
@@ -193,6 +204,8 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         defaultNotificationIcon = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ic_artist);
         this.icon = defaultNotificationIcon;
+
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (showNotifications()) {
             Notification notification = getPlayNotification(songTitle);
@@ -210,7 +223,6 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
         else
             notification = getPauseNotification(songTitle);
 
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, notification);
     }
 
@@ -220,16 +232,16 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
                 .setContentTitle(getString(R.string.notification_title))
                 .setTicker(getString(R.string.notification_ticker))
                 .setContentText(songTitle)
-                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setSmallIcon(R.drawable.ic_play_arrow_white_24dp)
                 .setLargeIcon(
                         Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_previous, getString(R.string.notification_previous_button),
+                .addAction(R.drawable.ic_skip_previous_black_24dp, getString(R.string.notification_previous_button),
                         pPreviousIntent)
-                .addAction(android.R.drawable.ic_media_play, getString(R.string.notification_play_button),
+                .addAction(R.drawable.ic_play_arrow_black_24dp, getString(R.string.notification_play_button),
                         pPlayIntent)
-                .addAction(android.R.drawable.ic_media_next, getString(R.string.notification_next_button),
+                .addAction(R.drawable.ic_skip_next_black_24dp, getString(R.string.notification_next_button),
                         pNextIntent)
                 .build();
     }
@@ -240,46 +252,59 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
                 .setContentTitle(getString(R.string.notification_title))
                 .setTicker(getString(R.string.notification_ticker))
                 .setContentText(songTitle)
-                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setSmallIcon(R.drawable.ic_play_arrow_white_24dp)
                 .setLargeIcon(
                         Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_previous, getString(R.string.notification_previous_button),
+                .addAction(R.drawable.ic_skip_previous_black_24dp, getString(R.string.notification_previous_button),
                         pPreviousIntent)
-                .addAction(android.R.drawable.ic_media_pause, getString(R.string.notification_pause_button),
+                .addAction(R.drawable.ic_pause_black_24dp, getString(R.string.notification_pause_button),
                         pPauseIntent)
-                .addAction(android.R.drawable.ic_media_next, getString(R.string.notification_next_button),
+                .addAction(R.drawable.ic_skip_next_black_24dp, getString(R.string.notification_next_button),
                         pNextIntent)
                 .build();
     }
 
+    public void stopPlayer() {
+        player.pause();
+        player.seekTo(0);
+
+        mNotificationManager.cancel(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE);
+
+        stopForeground(true);
+    }
+
     public void nextSong() {
-        songListPosition++;
-        if (mSongList.size() <= songListPosition)
-            songListPosition = 0;
+        if (mSongList != null) {
+            songListPosition++;
+            if (mSongList.size() <= songListPosition)
+                songListPosition = 0;
 
-        if (fragment != null) {
-            fragment.setCurrentSong(songListPosition);
-            fragment.updateUI();
+            if (fragment != null) {
+                fragment.setCurrentSong(songListPosition);
+                fragment.updateUI();
+            }
+
+            prepareSong();
+            playSong();
         }
-
-        prepareSong();
-        playSong();
     }
 
     public void previousSong() {
-        songListPosition--;
-        if (songListPosition < 0)
-            songListPosition = mSongList.size() - 1;
+        if (mSongList != null) {
+            songListPosition--;
+            if (songListPosition < 0)
+                songListPosition = mSongList.size() - 1;
 
-        if (fragment != null) {
-            fragment.setCurrentSong(songListPosition);
-            fragment.updateUI();
+            if (fragment != null) {
+                fragment.setCurrentSong(songListPosition);
+                fragment.updateUI();
+            }
+
+            prepareSong();
+            playSong();
         }
-
-        prepareSong();
-        playSong();
     }
 
     private String getSongTitle() {

@@ -7,6 +7,7 @@ public class Constants {
         String PREV_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.prev";
         String PLAY_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.play";
         String PAUSE_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.pause";
+        String STOP_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.stop";
         String NEXT_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.next";
         String OPEN_PLAYER_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.open_player";
         String STARTFOREGROUND_ACTION = "co.carlosandresjimenez.android.spotifystreamer.action.startforeground";

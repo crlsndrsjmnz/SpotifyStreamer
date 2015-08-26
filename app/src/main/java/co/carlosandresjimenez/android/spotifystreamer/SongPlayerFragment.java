@@ -58,6 +58,8 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     ImageView mBtPlaySong;
     @Bind(R.id.next_song_button)
     ImageView mBtNextSong;
+    @Bind(R.id.stop_song_button)
+    ImageView mBtStopSong;
     @Bind(R.id.share_song_button)
     ImageView mBtShareSong;
     @Bind(R.id.player_progress_bar)
@@ -81,7 +83,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     private Runnable moveSeekBarThread = new Runnable() {
 
         public void run() {
-            if (musicPlayerSrv.isPlayingSong()) {
+            if (musicPlayerSrv.isPrepared() && musicPlayerSrv.isPlayingSong()) {
                 int newSongPosition = musicPlayerSrv.getCurrentPosition();
                 int songDuration = musicPlayerSrv.getDuration();
 
@@ -94,12 +96,9 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                 // Looping the thread after 0.1 seconds
                 mHandler.postDelayed(this, Constants.PLAYER_SERVICE.SEEK_BAR_REFRESH_RATE);
             } else {
-                int songDuration = musicPlayerSrv.getDuration();
-
-                mSbSongProgress.setMax(songDuration);
                 mSbSongProgress.setProgress(0);
 
-                mTvSongLength.setText(formatDuration(songDuration));
+                mTvSongLength.setText("");
                 mTvSongProgress.setText(formatDuration(0));
             }
         }
@@ -148,6 +147,9 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     @Override
     public void onResume() {
         super.onResume();
+
+        if (musicBound && musicPlayerSrv.isPrepared() && musicPlayerSrv.isPlayingSong())
+            updateSongTimer();
 
         // safety check
         if (getDialog() == null) {
@@ -322,6 +324,16 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
         }
     }
 
+    @OnClick(R.id.stop_song_button)
+    void onStopSong() {
+
+        if (musicBound) {
+            musicPlayerSrv.stopPlayer();
+            mBtPlaySong.setSelected(false);
+            updateSongTimer();
+        }
+    }
+
     @OnClick(R.id.share_song_button)
     void onShareSong() {
         Intent intent = createShareForecastIntent();
@@ -399,7 +411,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                 if (musicPlayerSrv.isPlayingSong())
                     mBtPlaySong.setSelected(true);
 
-                mHandler.postDelayed(moveSeekBarThread, Constants.PLAYER_SERVICE.SEEK_BAR_REFRESH_RATE);
+                updateSongTimer();
             }
 
         } catch (Exception e) {

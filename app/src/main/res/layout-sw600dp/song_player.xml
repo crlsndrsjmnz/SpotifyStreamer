@@ -76,28 +76,35 @@
                 android:id="@+id/previous_song_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_previous" />
+                android:src="@drawable/ic_skip_previous_white_24dp" />
 
             <ImageView
                 android:id="@+id/play_song_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
+                android:layout_marginLeft="60dp"
                 android:src="@drawable/play_selector" />
+
+            <ImageView
+                android:id="@+id/stop_song_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60dp"
+                android:src="@drawable/ic_stop_white_24dp" />
 
             <ImageView
                 android:id="@+id/next_song_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
-                android:src="@android:drawable/ic_media_next" />
+                android:layout_marginLeft="60dp"
+                android:src="@drawable/ic_skip_next_white_24dp" />
 
             <ImageView
                 android:id="@+id/share_song_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
-                android:src="@android:drawable/ic_menu_share"
+                android:layout_marginLeft="60dp"
+                android:src="@drawable/ic_share_white_24dp"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
