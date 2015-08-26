@@ -110,10 +110,22 @@ public class MusicPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
 
+        detach();
         player.stop();
         player.release();
         stopForeground(true);
         stopSelf();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        detach();
+        player.stop();
+        player.release();
+        stopForeground(true);
+        stopSelf();
+
+        super.onTaskRemoved(rootIntent);
     }
 
     @Override

@@ -70,6 +70,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     private boolean musicBound = false;
     private boolean gotSongList = true;
     private boolean isDialog = false;
+    private boolean mAutoPlaySong = false;
 
     private ShareActionProvider mShareActionProvider;
     private String mShareDetails;
@@ -125,6 +126,12 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                     getTrackDetails();
             }
 
+            if (mAutoPlaySong) {
+                mBtPlaySong.setSelected(false);
+                onPlayOrPauseSong();
+                mAutoPlaySong = false;
+            }
+
             musicPlayerSrv.attach(SongPlayerFragment.this);
         }
 
@@ -136,6 +143,21 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
 
     public SongPlayerFragment() {
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // safety check
+        if (getDialog() == null) {
+            return;
+        }
+
+        int width = getResources().getDimensionPixelSize(R.dimen.popup_width);
+        int height = getResources().getDimensionPixelSize(R.dimen.popup_height);
+
+        getDialog().getWindow().setLayout(width, height);
     }
 
     @Override
@@ -166,6 +188,7 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
             if (arguments != null && arguments.containsKey(Constants.INTENT_EXTRA_ID.TRACK_LIST)) {
                 mSongList = arguments.getParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST);
                 mCurrentSong = arguments.getInt(Constants.INTENT_EXTRA_ID.TRACK_CURRENT_POSITION);
+                mAutoPlaySong = true;
             } else {
                 gotSongList = false;
             }
@@ -191,6 +214,12 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
         super.onDestroy();
 
         musicPlayerSrv.detach();
+    }
+
+    public void onDestroyView() {
+        if (getDialog() != null && getRetainInstance())
+            getDialog().setDismissMessage(null);
+        super.onDestroyView();
     }
 
     @Override
@@ -343,8 +372,15 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
         try {
             playerProgressBar.setVisibility(View.INVISIBLE);
 
-            mTvArtistName.setText(mSongList.get(mCurrentSong).getArtist());
-            mTvAlbumTitle.setText(mSongList.get(mCurrentSong).getDescription());
+            String artistName = mSongList.get(mCurrentSong).getArtist();
+            if (artistName.length() > 50)
+                artistName = artistName.substring(0, 50) + "...";
+            mTvArtistName.setText(artistName);
+
+            String albumTitle = mSongList.get(mCurrentSong).getDescription();
+            if (albumTitle.length() > 50)
+                albumTitle = albumTitle.substring(0, 50) + "...";
+            mTvAlbumTitle.setText(albumTitle);
 
             Uri imgUri = Uri.parse(mSongList.get(mCurrentSong).getImageUrlHq());
 
@@ -354,7 +390,10 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
                     .error(R.drawable.ic_artist)
                     .into(mIvAlbumCover);
 
-            mTvSongTitle.setText(mSongList.get(mCurrentSong).getName());
+            String songTitle = mSongList.get(mCurrentSong).getName();
+            if (songTitle.length() > 50)
+                songTitle = songTitle.substring(0, 50) + "...";
+            mTvSongTitle.setText(songTitle);
 
             if (musicPlayerSrv != null) {
                 if (musicPlayerSrv.isPlayingSong())

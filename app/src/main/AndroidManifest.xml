@@ -40,7 +40,9 @@
                 android:value=".MainActivity" />
         </activity>
 
-        <service android:name=".MusicPlayerService"></service>
+        <service
+            android:name=".MusicPlayerService"
+            android:stopWithTask="false"></service>
     </application>
 
 </manifest>

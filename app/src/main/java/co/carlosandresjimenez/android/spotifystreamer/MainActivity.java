@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
         SongPlayerFragment fragment = new SongPlayerFragment();
         fragment.setArguments(arguments);
+        fragment.setMenuVisibility(true);
+
         fragment.show(getSupportFragmentManager(), Constants.FRAGMENT_ID.SONGPLAYER_TAG);
     }
 
