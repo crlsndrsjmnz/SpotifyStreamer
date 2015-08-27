@@ -7,6 +7,7 @@
     <string name="action_share">Share</string>
 
     <string name="top_songs_activity_name">Top 10 Tracks</string>
+    <string name="player_activity_name">Song Player</string>
     <string name="search_box_hint">Search for an artist</string>
 
     <string name="format_duration"><xliff:g id="minutes">%1$02d</xliff:g>:<xliff:g id="seconds">%2$02d</xliff:g></string>

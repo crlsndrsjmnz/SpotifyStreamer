@@ -433,14 +433,15 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     }
 
     private String formatDuration(long duration) {
-        String durationStr;
+        String durationStr = "";
 
         int milliseconds = (int) duration % 60;
         int seconds = (int) (duration / 1000) % 60;
         int minutes = (int) ((duration / (1000 * 60)) % 60);
         int hours = (int) ((duration / (1000 * 60 * 60)) % 24);
 
-        durationStr = String.format(getActivity().getString(R.string.format_duration), minutes, seconds);
+        if (getActivity() != null)
+            durationStr = String.format(getActivity().getString(R.string.format_duration), minutes, seconds);
 
         return durationStr;
     }

@@ -1,6 +1,8 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -72,14 +74,18 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void searchArtist(String query) {
-        artistSearchBar.clearFocus();
-        InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        in.hideSoftInputFromWindow(artistSearchBar.getWindowToken(), 0);
+        if (isNetworkAvailable()) {
+            artistSearchBar.clearFocus();
+            InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            in.hideSoftInputFromWindow(artistSearchBar.getWindowToken(), 0);
 
-        progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
 
-        FetchArtistsTask artistsTask = new FetchArtistsTask();
-        artistsTask.execute(query);
+            FetchArtistsTask artistsTask = new FetchArtistsTask();
+            artistsTask.execute(query);
+        } else {
+            Toast.makeText(getActivity(), "No Network", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -129,6 +135,13 @@ public class MainActivityFragment extends Fragment {
 
         savedInstanceState.putInt(Constants.STATE_ID.KEY_ARTISTS_LIST_POSITION, listOfArtists.getFirstVisiblePosition());
         savedInstanceState.putParcelableArrayList(Constants.STATE_ID.KEY_ARTISTS_VIEW_STATE, mListAdapter.getAllItems());
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     /**
