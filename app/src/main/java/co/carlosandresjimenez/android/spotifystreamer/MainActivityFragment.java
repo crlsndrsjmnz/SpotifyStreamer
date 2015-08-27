@@ -1,8 +1,6 @@
 package co.carlosandresjimenez.android.spotifystreamer;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -74,7 +72,7 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void searchArtist(String query) {
-        if (isNetworkAvailable()) {
+        if (((Callback) getActivity()).isNetworkAvailable()) {
             artistSearchBar.clearFocus();
             InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             in.hideSoftInputFromWindow(artistSearchBar.getWindowToken(), 0);
@@ -137,13 +135,6 @@ public class MainActivityFragment extends Fragment {
         savedInstanceState.putParcelableArrayList(Constants.STATE_ID.KEY_ARTISTS_VIEW_STATE, mListAdapter.getAllItems());
     }
 
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -154,6 +145,8 @@ public class MainActivityFragment extends Fragment {
          * DetailFragmentCallback for when an item has been selected.
          */
         void onArtistSelected(ListItem item);
+
+        boolean isNetworkAvailable();
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, AsyncTaskResult<List<Artist>>> {
