@@ -235,6 +235,20 @@ public class SongPlayerFragment extends DialogFragment implements SeekBar.OnSeek
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(getActivity(), TopSongsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putParcelableArrayListExtra(Constants.INTENT_EXTRA_ID.TRACK_LIST, mSongList);
+                intent.putExtra(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME, mSongList.get(mCurrentSong).getArtist());
+                startActivity(intent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 

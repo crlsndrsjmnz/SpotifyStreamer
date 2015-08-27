@@ -17,7 +17,22 @@ public class TopSongsActivity extends AppCompatActivity implements TopSongsFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        if (savedInstanceState == null) {
+        if (getIntent() != null && getIntent().getExtras() != null &&
+                getIntent().getExtras().containsKey(Constants.INTENT_EXTRA_ID.TRACK_LIST)) {
+
+            Bundle arguments = new Bundle();
+            arguments.putParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST,
+                    getIntent().getParcelableArrayListExtra(Constants.INTENT_EXTRA_ID.TRACK_LIST));
+            arguments.putString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME,
+                    getIntent().getStringExtra(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME));
+
+            TopSongsFragment fragment = new TopSongsFragment();
+            fragment.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.artist_detail_container, fragment)
+                    .commit();
+        } else if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
 

@@ -47,6 +47,7 @@ public class TopSongsFragment extends Fragment {
     private String mArtistId;
     private String mArtistName;
     private StreamerListAdapter mListAdapter;
+    private boolean searchTopSongs = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,8 +81,14 @@ public class TopSongsFragment extends Fragment {
         mArtistName = "";
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mArtistId = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID);
-            mArtistName = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME);
+            if (arguments.containsKey(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID)) {
+                mArtistId = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_ID);
+                mArtistName = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME);
+            } else if (arguments.containsKey(Constants.INTENT_EXTRA_ID.TRACK_LIST)) {
+                mSongList = arguments.getParcelableArrayList(Constants.INTENT_EXTRA_ID.TRACK_LIST);
+                mArtistName = arguments.getString(Constants.INTENT_EXTRA_ID.KEY_ARTIST_NAME);
+                searchTopSongs = false;
+            }
         }
 
         // The ArrayAdapter will take data from a source and
@@ -98,7 +105,7 @@ public class TopSongsFragment extends Fragment {
         actionBarSetup();
 
         // If the adapter is empty, look for the tracks.
-        if (mListAdapter.getCount() == 0)
+        if (mListAdapter.getCount() == 0 && searchTopSongs)
             searchTopTracks();
 
         return rootView;

@@ -31,12 +31,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".SongPlayerActivity">
-            android:label="@string/top_songs_activity_name"
-            android:parentActivityName=".MainActivity">
+        <activity
+            android:name=".SongPlayerActivity"
+            android:label="@string/player_activity_name"
+            android:parentActivityName=".TopSongsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".TopSongsActivity" />
         </activity>
         <activity
             android:name=".SettingsActivity"
